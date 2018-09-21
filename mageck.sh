@@ -9,12 +9,37 @@
 #				4. MAGeCK rra  
 #
 #Author: Lucy Liu
+
+
+#########################################################
+# Arguments
 #
+# Change these arguments for each new project
+#
+#########################################################
+
+# Directory path of file where the compressed fastq files are:
+
+gzfastqfile="/Volumes/bioinf_pipeline/Runs/NextSeq/180917_NB501056_0192_AH3NYHBGX9/ProjectFolders/Project_Iva-Nikolic"
+
+# Directory path of the file where you want the uncompressed fastq files to go -
+# this location will be the 'working directory'
+
+workdir="/Volumes/Users/Lucy/CRISPR/Iva20180921"
+
+# Name of the file where the sgRNA annotation file is
+
+# sgRNAfile=""
+
+# # Sample labels, comma separated
+
+# samlabels=""
+
 #######################################
 # Unzip fastq files to choosen directory
 #######################################
 
-# cd /Volumes/bioinf_pipeline/Runs/NextSeq/180416_NB501056_0120_AHTF5JBGX5/ProjectFolders/Project_Aishwarya-Kulkarni
+# cd ${gzfastqfile}
 
 # for file in $(ls */*.gz);
 
@@ -23,8 +48,8 @@
 #         bname=$(basename ${file} .fastq.gz)
 #         # get the base name of the file and also remove the '.fastq.gz' at the end
 #         echo $bname
-#         gzip -d -c ${file} > /Users/liulucy/Documents/CRISPR/Batch1/Data/Reads/${bname}.fastq
-#         # -decompress = unzip, send output to location as specified, add txt to end of file name
+#         gzip -d -c ${file} > ${workdir}${bname}.fastq
+#         # -decompress = unzip, send output to location as specified, add fastq to end of file name
 # done
 
 ###############################
@@ -33,7 +58,7 @@
 # Use 'cutadapt' to trim adaptors
 
 
-# cd /Users/liulucy/Documents/CRISPR/Data/Reads
+# cd ${workdir}
 # Change to working directory
 
 
@@ -44,13 +69,13 @@
 # for file in $(ls *1.fastq);
 
 # do
-#         echo ${file}
-# 	bname=$(basename ${file} .fastq)
-# 	echo $bname
-#         cutadapt -g TGTGGAAAGGACGAAACACCG -o ${bname}.trimmed_P5.fastq ${file} > trimP5_${bname}_log.txt
-#         #trim 5' adaptor
-#         cutadapt -a GTTTTAGAGCTAGAAATAGCAAG -o ${bname}.trimmed_P7.fastq ${bname}.trimmed_P5.fastq > trimP7_${bname}_log.txt
-#         #trim 3' adaptor
+# 		echo ${file}
+# 		bname=$(basename ${file} .fastq)
+# 		echo $bname
+#       cutadapt -g TGTGGAAAGGACGAAACACCG -o ${bname}.trimmed_P5.fastq ${file} > trimP5_${bname}_log.txt
+#       #trim 5' adaptor
+#       cutadapt -a GTTTTAGAGCTAGAAATAGCAAG -o ${bname}.trimmed_P7.fastq ${bname}.trimmed_P5.fastq > trimP7_${bname}_log.txt
+#       #trim 3' adaptor
 # done
 
 
@@ -62,13 +87,14 @@
 # cd Count/
 
 
-# mageck count -l ../Data/Annotations/all_sequences.txt \
+# mageck count -l ../Data/Annotations/${sgRNAfile} \
 # -n "all" \
 # --pdf-report \
-# --norm "none" \
-# --control-sgrna ../Data/Annotations/negControl.txt \
+# --norm "median" \
 # --fastq `ls ../Data/Reads/*/*.fastq | tr '\n' ' '` \
-# --sample-label EV0B1,EV21B1,SG120B1,SG1221B1,EV0B2,EV21B2,SG120B2,SG1221B2
+# --sample-label ${samlabels}
+
+# --control-sgrna ../Data/Annotations/negControl.txt \
 
 #Note tr gets rid of the newline character at the end of each line of output
 #and replaces with space
@@ -91,12 +117,12 @@
 # cd mle/
 
 
-mageck mle -k all.count_normalized.txt \
---design-matrix Data/Annotations/design_mat.txt \
--n "Results" \
---control-sgrna Data/Annotations/negControl.txt \
---update-efficiency \
---norm-method "none"
+# mageck mle -k all.count_normalized.txt \
+# --design-matrix Data/Annotations/design_mat.txt \
+# -n "Results" \
+# --control-sgrna Data/Annotations/negControl.txt \
+# --update-efficiency \
+# --norm-method "none"
 
 
 ########################
